@@ -1,13 +1,12 @@
 "use client";
 import React, { useState } from "react";
-import { Button, Stack, Form,Spinner  } from "react-bootstrap";
+import { Button, Stack, Form, Spinner, ToggleButtonGroup } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
 
 export default function ConfigSideNav() {
-  const [isLoading, setIsLoading] = useState(false);
   const [downloadInProgress, setdownloadInProgress] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [isUploading, setIsUploading] = useState(null);
+  const [modelName, setModelName] = useState('GPT4All');
 
   const ingestData = async () => {
     try {
@@ -31,7 +30,7 @@ export default function ConfigSideNav() {
   const handleDownloadModel = async () => {
     try {
       setdownloadInProgress(true);
-      const res = await fetch("http://localhost:5000/download_model");
+      const res = await fetch(`http://localhost:5000/download_model?model_name=${modelName}`);
       const jsonData = await res.json();
       if (!res.ok) {
 	    response.text().then(text => {toast.error("Error downloading model."+text);})  
@@ -92,16 +91,48 @@ export default function ConfigSideNav() {
   return (
     <>
       <div className="mx-4 mt-3">
-        <Form.Group className="mb-3">
-          <Form.Label>Upload your documents</Form.Label>
-          <Form.Control
-            type="file"
-            size="sm"
-            onChange={handleFileChange}
-            id="file-input"
+        <Form>
+          <Form.Check
+            type='radio'
+            label={'Falcon-7B'}
+            id={'Falcon-7B'}
+            value={'tiiuae/falcon-7b'}
+            checked={modelName==='tiiuae/falcon-7b'}
+            onChange={(e) => {
+              setModelName(e.target.value);
+            }}
           />
-        </Form.Group>
-        {isUploading? <div className="d-flex justify-content-center"><Spinner animation="border" /><span className="ms-3">uploading</span></div>:<Button onClick={(e) => handleUpload()}>Upload</Button>}
+          <Form.Check
+            type='radio'
+            label={'Koala 13b'}
+            id={'Koala 13b'}
+            value={'TheBloke/koala-13B-HF'}
+            checked={modelName==='TheBloke/koala-13B-HF'}
+            onChange={(e) => {
+              setModelName(e.target.value);
+            }}
+          />
+          <Form.Check
+            type='radio'
+            label={'Vicuna 13b'}
+            id={'Vicuna 13b'}
+            value={'lmsys/vicuna-13b-delta-v0'}
+            checked={modelName==='lmsys/vicuna-13b-delta-v0'}
+            onChange={(e) => {
+              setModelName(e.target.value);
+            }}
+          />
+          <Form.Check
+            type='radio'
+            label={'GPT4All'}
+            id={'GPT4All'}
+            value={'nomic-ai/gpt4all-j'}
+            checked={modelName==='nomic-ai/gpt4all-j'}
+            onChange={(e) => {
+              setModelName(e.target.value);
+            }}
+          />
+        </Form>
       </div>
       <Stack direction="horizontal" className="mx-4 mt-5" gap={3}>
         {downloadInProgress ? (
@@ -116,11 +147,6 @@ export default function ConfigSideNav() {
               Download Model
             </Button>
           </div>
-        )}
-        {isLoading ? (
-          <div className="d-flex justify-content-center"><Spinner animation="border" /><span className="ms-3">ingesting</span></div>
-        ) : (
-          <Button onClick={() => ingestData()}>Ingest Data</Button>
         )}
       </Stack>
     </>
