@@ -105,7 +105,7 @@ class OpenLlamaModel:
         self,
         input,
         max_new_tokens=128,
-        **kwargs,
+        **kwargs
     ):
         import torch
         from transformers import GenerationConfig
