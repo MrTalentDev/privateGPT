@@ -59,23 +59,23 @@ def download_and_save():
     return jsonify(response='Download completed')
 
 
-@stub.local_entrypoint()
 @app.route('/get_answer', methods=['POST'])
 def get_answer():
     query = request.json
 
-    if model_name in locals() or model_name in globals():
+    if model_name == None or model_name == '':
         return 'Model is not downloaded', 400
     if query != None and query != '':
         model = OpenLlamaModel()
-        answer = model.generate.call(
-            query,
-            top_p=0.75,
-            top_k=40,
-            num_beams=1,
-            temperature=0.1,
-            do_sample=True,
-        )
+        with stub.run():
+           answer = model.generate.call(
+               query,
+               top_p=0.75,
+               top_k=40,
+               num_beams=1,
+               temperature=0.1,
+               do_sample=True,
+           )
 
         return jsonify(query=query, answer=answer)
 
@@ -126,10 +126,12 @@ class OpenLlamaModel:
             )
         s = generation_output.sequences[0]
         output = self.tokenizer.decode(s)
-        print(f"\033[96m{input}\033[0m")
+        # print(f"\033[96m{input}\033[0m")
         print(output.split(input)[1].strip())
-        return print(output.split(input)[1].strip())
+        return output.split(input)[1].strip()
 
 
 if __name__ == '__main__':
+    global model_name
+    model_name = None
     app.run(host='0.0.0.0', debug=False)
