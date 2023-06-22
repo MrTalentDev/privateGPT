@@ -42,7 +42,8 @@ def get_answer():
 
 @app.route('/download_model', methods=['GET'])
 def download_and_save():
-    filename = request.args.get('model_name')  # Downloaded file name
+    fullName = request.args.get('model_name')  # Downloaded file name
+    filename = fullName.split('/')[1]
     # Download url
     url = f'https://huggingface.co/{filename}/blob/main/pytorch_model-00002-of-00002.bin' if filename.find(
         '13b') > -1 else f'https://huggingface.co/{filename}/blob/main/pytorch_model-00003-of-00003.bin'
@@ -50,6 +51,8 @@ def download_and_save():
 
     if not os.path.exists(models_folder):
         os.makedirs(models_folder)
+    if not os.path.exists(fullName.split('/')[0]):
+        os.makedirs(fullName.split('/')[0])
     response = requests.get(url, stream=True)
     total_size = int(response.headers.get('content-length', 0))
     bytes_downloaded = 0
