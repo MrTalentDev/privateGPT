@@ -64,6 +64,8 @@ def download_and_save():
 def get_answer():
     query = request.json
 
+    if model_name in locals() or model_name in globals():
+        return 'Model is not downloaded', 400
     if query != None and query != '':
         model = OpenLlamaModel()
         answer = model.generate.call(
