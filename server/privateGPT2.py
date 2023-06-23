@@ -6,13 +6,6 @@ from langchain.llms import LlamaCpp
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain.callbacks.manager import CallbackManager
-from langchain.prompts.chat import (
-    ChatPromptTemplate,
-    SystemMessagePromptTemplate,
-    AIMessagePromptTemplate,
-    HumanMessagePromptTemplate,
-    BaseChatPromptTemplate
-)
 import os
 import requests
 
@@ -30,19 +23,10 @@ def get_answer():
     if llm == None:
         return 'Model not downloaded', 400
     if query != None and query != '':
+        template = """{question}"""
 
-        template = "You are a helpful assistant that translates {input_language} to {output_language}."
-        system_message_prompt = SystemMessagePromptTemplate.from_template(
-            template)
-        human_template = "{text}"
-        human_message_prompt = HumanMessagePromptTemplate.from_template(
-            human_template)
-
-        chat_prompt = ChatPromptTemplate.from_messages(
-            [system_message_prompt, human_message_prompt])
-        prompt = PromptTemplate.from_template(chat_prompt.format_prompt(
-            input_language="English", output_language="French", text="I love programming.").to_string())
-
+        prompt = PromptTemplate(
+            template=template, input_variables=["question"])
         llm_chain = LLMChain(prompt=prompt, llm=llm)
         answer = llm_chain.run(query, callbacks=[
                                StreamingStdOutCallbackHandler()])
