@@ -14,6 +14,10 @@ CORS(app)
 
 load_dotenv()
 
+gpt4all_url = os.environ.get("GPT_4_ALL")
+koala_url = os.environ.get("KOALA_13b_HF")
+falcon_url = os.environ.get("FALCON_7B_HF")
+vicuna_url = os.environ.get("VICUNA_13b_HF")
 llm = None
 
 
@@ -38,24 +42,31 @@ def get_answer():
 
 @app.route('/download_model', methods=['GET'])
 def download_and_save():
-    full_name = request.args.get('model_name')  # Downloaded file name
-    folder_name = full_name.split('/')[0]
-    file_name = full_name.split('/')[1]
+    file_name = request.args.get('model_name')  # Downloaded file name
+
     # Download url
-    url = f'https://huggingface.co/TheBloke/koala-13B-GGML/resolve/main/koala-13B.ggmlv3.q8_0.bin'
+    url = ''
+    if file_name == 'gpt4all':
+        url = gpt4all_url
+    elif file_name == 'falcon':
+        url = falcon_url
+    elif file_name == 'koala':
+        url = koala_url
+    elif file_name == 'vicuna':
+        url = vicuna_url
+    else:
+        return 'Choose the model', 400
+
     print(url)
     models_folder = 'models'  # Specify the name of the folder inside the Flask app root
 
     if not os.path.exists(models_folder):
         os.makedirs(models_folder)
-    if not os.path.exists(f'{models_folder}/{folder_name}'):
-        os.makedirs(f'{models_folder}/{folder_name}')
     response = requests.get(url, stream=True)
     total_size = int(response.headers.get('content-length', 0))
     bytes_downloaded = 0
-    file_path = f'{models_folder}/{folder_name}/{file_name}'
+    file_path = f'{models_folder}/{file_name}'
     if not os.path.exists(file_path):
-        # return jsonify(response='Download completed')
         with open(file_path, 'wb') as file:
             for chunk in response.iter_content(chunk_size=4096):
                 file.write(chunk)

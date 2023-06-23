@@ -96,8 +96,8 @@ export default function ConfigSideNav() {
             type='radio'
             label={'Falcon-7B'}
             id={'Falcon-7B'}
-            value={'tiiuae/falcon-7b'}
-            checked={modelName==='tiiuae/falcon-7b'}
+            value={'falcon'}
+            checked={modelName==='falcon'}
             onChange={(e) => {
               setModelName(e.target.value);
             }}
@@ -106,8 +106,8 @@ export default function ConfigSideNav() {
             type='radio'
             label={'Koala 13b'}
             id={'Koala 13b'}
-            value={'TheBloke/koala-13B-HF'}
-            checked={modelName==='TheBloke/koala-13B-HF'}
+            value={'koala'}
+            checked={modelName==='koala'}
             onChange={(e) => {
               setModelName(e.target.value);
             }}
@@ -116,8 +116,8 @@ export default function ConfigSideNav() {
             type='radio'
             label={'Vicuna 13b'}
             id={'Vicuna 13b'}
-            value={'lmsys/vicuna-13b-delta-v0'}
-            checked={modelName==='lmsys/vicuna-13b-delta-v0'}
+            value={'vicuna'}
+            checked={modelName==='vicuna'}
             onChange={(e) => {
               setModelName(e.target.value);
             }}
@@ -126,8 +126,8 @@ export default function ConfigSideNav() {
             type='radio'
             label={'GPT4All'}
             id={'GPT4All'}
-            value={'nomic-ai/gpt4all-j'}
-            checked={modelName==='nomic-ai/gpt4all-j'}
+            value={'gpt4all'}
+            checked={modelName==='gpt4all'}
             onChange={(e) => {
               setModelName(e.target.value);
             }}
