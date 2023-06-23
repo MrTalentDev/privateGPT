@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.llms import LlamaCpp
 from langchain.chains import LLMChain
-from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+from langchain.prompts import PromptTemplate
 from langchain.callbacks.manager import CallbackManager
 import os
 import requests
@@ -25,16 +25,19 @@ llm = None
 @app.route('/get_answer', methods=['POST'])
 def get_answer():
     query = request.json
-    prompt = ChatPromptTemplate.from_messages([
-        SystemMessagePromptTemplate.from_template(
-            'You are helpful assistant, a large language model, answer as concisely as possible.'),
-        HumanMessagePromptTemplate.from_template('{query}')
-    ])
-    llm_chain = LLMChain(prompt=prompt, llm=llm)
+    print(query)
     if llm == None:
         return 'Model not downloaded', 400
     if query != None and query != '':
-        answer = llm_chain.run(query=query)
+        template = """Question: {question}
+
+        Answer: Let's work this out in a step by step way to be sure we have the right answer."""
+
+        prompt = PromptTemplate(
+            template=template, input_variables=["question"])
+        llm_chain = LLMChain(prompt=prompt, llm=llm)
+        answer = llm_chain.run(query, callbacks=[
+                               StreamingStdOutCallbackHandler()])
 
         return jsonify(query=query, answer=answer)
 
