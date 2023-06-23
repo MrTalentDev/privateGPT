@@ -5,6 +5,7 @@ from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.llms import LlamaCpp
 from langchain.chains import LLMChain
 from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+from langchain.callbacks.manager import CallbackManager
 import os
 import requests
 
@@ -33,7 +34,7 @@ def get_answer():
     if llm == None:
         return 'Model not downloaded', 400
     if query != None and query != '':
-        answer = llm_chain.run({query: query})
+        answer = llm_chain.run(query=query)
 
         return jsonify(query=query, answer=answer)
 
@@ -42,32 +43,32 @@ def get_answer():
 
 @app.route('/download_model', methods=['GET'])
 def download_and_save():
-    fullName = request.args.get('model_name')  # Downloaded file name
-    filename = fullName.split('/')[1]
+    full_name = request.args.get('model_name')  # Downloaded file name
+    folder_name = full_name.split('/')[0]
+    file_name = full_name.split('/')[1]
     # Download url
-    url = f'https://huggingface.co/{filename}/blob/main/pytorch_model-00002-of-00002.bin' if filename.find(
-        '13b') > -1 else f'https://huggingface.co/{filename}/blob/main/pytorch_model-00003-of-00003.bin'
+    url = f'https://huggingface.co/TheBloke/koala-13B-GGML/resolve/main/koala-13B.ggmlv3.q8_0.bin'
+    print(url)
     models_folder = 'models'  # Specify the name of the folder inside the Flask app root
 
     if not os.path.exists(models_folder):
         os.makedirs(models_folder)
-    if not os.path.exists(fullName.split('/')[0]):
-        os.makedirs(fullName.split('/')[0])
+    if not os.path.exists(f'{models_folder}/{folder_name}'):
+        os.makedirs(f'{models_folder}/{folder_name}')
     response = requests.get(url, stream=True)
     total_size = int(response.headers.get('content-length', 0))
     bytes_downloaded = 0
-    file_path = f'{models_folder}/{filename}'
-    if os.path.exists(file_path):
-        return jsonify(response='Download completed')
-
-    with open(file_path, 'wb') as file:
-        for chunk in response.iter_content(chunk_size=4096):
-            file.write(chunk)
-            bytes_downloaded += len(chunk)
-            progress = round((bytes_downloaded / total_size) * 100, 2)
-            print(f'Download Progress: {progress}%')
+    file_path = f'{models_folder}/{folder_name}/{file_name}'
+    if not os.path.exists(file_path):
+        # return jsonify(response='Download completed')
+        with open(file_path, 'wb') as file:
+            for chunk in response.iter_content(chunk_size=4096):
+                file.write(chunk)
+                bytes_downloaded += len(chunk)
+                progress = round((bytes_downloaded / total_size) * 100, 2)
+                print(f'Download Progress: {progress}%')
     global llm
-    callbacks = [StreamingStdOutCallbackHandler()]
+    callbacks = CallbackManager([StreamingStdOutCallbackHandler()])
     llm = LlamaCpp(
         model_path=file_path,
         n_gpu_layers=40,
