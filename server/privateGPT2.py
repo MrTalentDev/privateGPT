@@ -6,6 +6,13 @@ from langchain.llms import LlamaCpp
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain.callbacks.manager import CallbackManager
+from langchain.prompts.chat import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    AIMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+    BaseChatPromptTemplate
+)
 import os
 import requests
 
@@ -14,27 +21,28 @@ CORS(app)
 
 load_dotenv()
 
-embeddings_model_name = os.environ.get('EMBEDDINGS_MODEL_NAME')
-persist_directory = os.environ.get('PERSIST_DIRECTORY')
-
-model_type = os.environ.get('MODEL_TYPE')
-model_n_ctx = os.environ.get('MODEL_N_CTX')
 llm = None
 
 
 @app.route('/get_answer', methods=['POST'])
 def get_answer():
     query = request.json
-    print(query)
     if llm == None:
         return 'Model not downloaded', 400
     if query != None and query != '':
-        template = """Question: {question}
 
-        Answer: Let's work this out in a step by step way to be sure we have the right answer."""
+        template = "You are a helpful assistant that translates {input_language} to {output_language}."
+        system_message_prompt = SystemMessagePromptTemplate.from_template(
+            template)
+        human_template = "{text}"
+        human_message_prompt = HumanMessagePromptTemplate.from_template(
+            human_template)
 
-        prompt = PromptTemplate(
-            template=template, input_variables=["question"])
+        chat_prompt = ChatPromptTemplate.from_messages(
+            [system_message_prompt, human_message_prompt])
+        prompt = PromptTemplate.from_template(chat_prompt.format_prompt(
+            input_language="English", output_language="French", text="I love programming.").to_string())
+
         llm_chain = LLMChain(prompt=prompt, llm=llm)
         answer = llm_chain.run(query, callbacks=[
                                StreamingStdOutCallbackHandler()])
