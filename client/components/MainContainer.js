@@ -43,8 +43,7 @@ export default function MainContainer() {
             ...chatRef.current,
             {
               isBot: true,
-              msg: data.answer,
-              source: data.source,
+              msg: data.answer
             },
           ]);
           setLoading(false);
@@ -88,11 +87,6 @@ export default function MainContainer() {
                           ) : (
                             <Stack direction="vertical" gap={3}>
                               <span>{msg.msg}</span>
-                              <span style={{ fontSize: "12px" }}>
-                                {msg.source != null && msg.source != ""
-                                  ? "Source: " + msg.source[0]["name"]
-                                  : ""}
-                              </span>
                             </Stack>
                           )}
                         </>
@@ -111,7 +105,7 @@ export default function MainContainer() {
               style={{ color: "black" }}
             >
               <h1 className="mt-sm-5">
-                <small>PrivateGPT by SamurAI</small>
+                <small>PrivateGPT</small>
               </h1>
               <h3 style={{ color: "gray" }}>A better UI for PrivateGPT</h3>
             </Stack>
